@@ -41,42 +41,48 @@ enum ActorRole {
 
 // Core models
 model User {
-  id              String   @id @default(uuid())
-  authProviderId  String?  // Supabase Auth user id（任意保持）
-  email           String?  @unique
-  handle          String?  @unique
-  ageConfirmed    Boolean  @default(false)
-  referredBy      String?  // User.id
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid())
+  authProviderId String? // Supabase Auth user id（任意保持）
+  email          String?  @unique
+  handle         String?  @unique
+  ageConfirmed   Boolean  @default(false)
+  referredBy     String? // User.id
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  tierState       UserTierState?
-  transitions     TierTransition[]
-  obligations     Obligation[]
-  adViews         AdView[]
-  auditLogs       AuditLog[] @relation("AuditActor")
+  tierState         UserTierState?
+  transitions       TierTransition[]
+  obligations       Obligation[]
+  adViews           AdView[]
+  auditLogs         AuditLog[]          @relation("AuditActor")
+  DrawEntry         DrawEntry[]
+  DrawWin           DrawWin[]
+  LoginLog          LoginLog[]
+  NotificationToken NotificationToken[]
+  RouletteWin       RouletteWin[]
+  WishItem          WishItem[]
 }
 
 model Tier {
-  id                Int       @id // 1..8 を想定
+  id                Int      @id // 1..8 を想定
   name              String
   obligationsSchema Json
   perksSchema       Json
   rulesVersion      Int
-  activeFrom        DateTime  @default(now())
+  activeFrom        DateTime @default(now())
 
   users UserTierState[]
 }
 
 model UserTierState {
-  id            String   @id @default(uuid())
-  user          User     @relation(fields: [userId], references: [id])
-  userId        String   @unique
-  tier          Tier     @relation(fields: [tierId], references: [id])
+  id            String    @id @default(uuid())
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String    @unique
+  tier          Tier      @relation(fields: [tierId], references: [id])
   tierId        Int
-  effectiveFrom DateTime @default(now())
+  effectiveFrom DateTime  @default(now())
   lockUntil     DateTime?
-  stayDays      Int      @default(0)
+  stayDays      Int       @default(0)
 }
 
 model TierTransition {
@@ -93,41 +99,41 @@ model TierTransition {
 }
 
 model Obligation {
-  id             String            @id @default(uuid())
-  user           User              @relation(fields: [userId], references: [id])
+  id             String           @id @default(uuid())
+  user           User             @relation(fields: [userId], references: [id])
   userId         String
   period         ObligationPeriod
   schemaSnapshot Json
   issuedFor      DateTime // day/week/month の代表日
-  status         ObligationStatus  @default(pending)
-  progress       Json              @default("{}")
+  status         ObligationStatus @default(pending)
+  progress       Json             @default("{}")
 
   logs ObligationLog[]
 
-  @@index([userId, period, issuedFor])
   @@unique([userId, period, issuedFor])
+  @@index([userId, period, issuedFor])
 }
 
 model ObligationLog {
-  id            String      @id @default(uuid())
-  obligation    Obligation  @relation(fields: [obligationId], references: [id])
-  obligationId  String
-  kind          String // view_ad/login/referral etc
-  occurredAt    DateTime @default(now())
-  meta          Json?
+  id           String     @id @default(uuid())
+  obligation   Obligation @relation(fields: [obligationId], references: [id])
+  obligationId String
+  kind         String // view_ad/login/referral etc
+  occurredAt   DateTime   @default(now())
+  meta         Json?
 }
 
 model AdView {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  adSlot    String
-  tokenId   String?
-  verified  Boolean  @default(false)
-  viewedAt  DateTime @default(now())
+  id       String   @id @default(uuid())
+  user     User     @relation(fields: [userId], references: [id])
+  userId   String
+  adSlot   String
+  tokenId  String?
+  verified Boolean  @default(false)
+  viewedAt DateTime @default(now())
 
-  @@index([userId, adSlot, viewedAt])
   @@unique([tokenId])
+  @@index([userId, adSlot, viewedAt])
 }
 
 model Event {
@@ -141,12 +147,13 @@ model Event {
 }
 
 model Reward {
-  id      String     @id @default(uuid())
-  kind    RewardKind
-  weight  Float      @default(1)
+  id         String     @id @default(uuid())
+  kind       RewardKind
+  weight     Float      @default(1)
   windowFrom DateTime?
   windowTo   DateTime?
-  meta    Json?
+  meta       Json?
+  DrawWin    DrawWin[]
 }
 
 model DrawEntry {
@@ -196,7 +203,7 @@ model NotificationToken {
   user      User     @relation(fields: [userId], references: [id])
   userId    String
   token     String   @unique
-  platform  String   // web / ios / android
+  platform  String // web / ios / android
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -224,17 +231,17 @@ model RouletteWin {
 }
 
 model WishItem {
-  id         String   @id @default(uuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  title      String
-  imageUrl   String
-  productUrl String
-  weight     Float    @default(1)
-  clickCount Int      @default(0)
+  id            String    @id @default(uuid())
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String
+  title         String
+  imageUrl      String
+  productUrl    String
+  weight        Float     @default(1)
+  clickCount    Int       @default(0)
   lastClickedAt DateTime?
-  active     Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  active        Boolean   @default(true)
+  createdAt     DateTime  @default(now())
 
   @@index([userId, active])
 }

@@ -1,6 +1,7 @@
 {
   "name": "hachikai",
   "private": true,
+  "packageManager": "pnpm@10.17.0",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "turbo run dev --parallel",
