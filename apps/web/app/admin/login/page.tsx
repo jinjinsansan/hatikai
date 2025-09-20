@@ -1,6 +1,6 @@
 "use client"
 import { useState } from 'react'
-import Section from '../../components/Section'
+import Section from '@/components/Section'
 import { useRouter } from 'next/navigation'
 
 export default function AdminLoginPage() {

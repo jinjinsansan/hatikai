@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from 'react'
-import Section from '../components/Section'
+import Section from '@/components/Section'
 
 export default function AdminPage() {
   const [dash, setDash] = useState<any>(null)

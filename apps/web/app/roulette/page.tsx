@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Section from '../../components/Section'
-import { supabase } from '../../lib/supabaseClient'
+import Section from '@/components/Section'
+import { supabase } from '@/lib/supabaseClient'
 
 function ImageWheel({ images, rotation, spinning, durationMs, selectedIdx }: { images: { id: string; src: string; alt: string }[]; rotation: number; spinning: boolean; durationMs: number; selectedIdx: number | null }) {
   const count = Math.max(images.length, 1)
@@ -41,6 +41,7 @@ export default function RoulettePage() {
   const [durationMs, setDurationMs] = useState<number>(1800)
   const [ready, setReady] = useState<boolean>(false)
   const [tierId, setTierId] = useState<number | null>(null)
+  const [wins, setWins] = useState<any[]>([])
   const rafRef = useRef<number | null>(null)
   const angRef = useRef<number>(0)
   const velRef = useRef<number>(0) // deg/s
@@ -53,6 +54,12 @@ export default function RoulettePage() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => setAccessToken(s?.access_token ?? null))
     return () => { sub.subscription.unsubscribe() }
   }, [])
+
+  const refreshWins = async () => {
+    if (!accessToken) return
+    const res = await fetch('/api/me/roulette/wins', { headers: { authorization: `Bearer ${accessToken}` } })
+    if (res.ok) setWins(await res.json())
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -245,12 +252,6 @@ export default function RoulettePage() {
       </Section>
       <Section title="当選履歴（最近）">
         {wins.length ? (
-  const [wins, setWins] = useState<any[]>([])
-  const refreshWins = async () => {
-    if (!accessToken) return
-    const res = await fetch('/api/me/roulette/wins', { headers: { authorization: `Bearer ${accessToken}` } })
-    if (res.ok) setWins(await res.json())
-  }
           <ul className="divide-y divide-white/10 text-sm">
             {wins.map(w => (
               <li key={w.id} className="flex items-center justify-between py-2">
