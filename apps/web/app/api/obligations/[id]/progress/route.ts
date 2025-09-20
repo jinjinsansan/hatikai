@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 const API_URL = process.env.API_URL || 'http://localhost:3001'
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
