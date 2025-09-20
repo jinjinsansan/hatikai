@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "dist/main.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "dist/main.js"
+    }
+  ],
+  "env": {
+    "PORT": "3001",
+    "TIMEZONE": "Asia/Tokyo",
+    "DATABASE_URL": "@database_url",
+    "DIRECT_URL": "@direct_url",
+    "SUPABASE_JWT_SECRET": "@supabase_jwt_secret",
+    "ADMIN_TOKEN": "@admin_token",
+    "ADS_TOKEN_SECRET": "@ads_token_secret",
+    "MIN_AD_DURATION_SEC": "10"
+  }
+}
