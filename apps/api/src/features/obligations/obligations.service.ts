@@ -7,7 +7,7 @@ type Period = 'day' | 'week' | 'month'
 
 @Injectable()
 export class ObligationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(public readonly prisma: PrismaService) {}
 
   async generateForAllUsers(): Promise<{ created: number }> {
     const users = await this.prisma.user.findMany({ include: { tierState: true } })

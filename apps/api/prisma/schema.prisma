@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 // Enums
@@ -18,6 +19,13 @@ enum ObligationPeriod {
 enum ObligationStatus {
   pending
   completed
+  expired
+}
+
+enum PurchaseStatus {
+  pending
+  confirmed
+  rejected
   expired
 }
 
@@ -237,11 +245,51 @@ model WishItem {
   title         String
   imageUrl      String
   productUrl    String
+  asin          String?   // Amazon ASIN
+  price         Int?      // 価格（円）
   weight        Float     @default(1)
   clickCount    Int       @default(0)
   lastClickedAt DateTime?
   active        Boolean   @default(true)
   createdAt     DateTime  @default(now())
 
+  purchasesAsTarget PurchaseObligation[] @relation("TargetItem")
+
   @@index([userId, active])
+}
+
+// 購入義務
+model PurchaseObligation {
+  id             String         @id @default(uuid())
+  buyerId        String         // 購入者のユーザーID
+  targetItem     WishItem?      @relation("TargetItem", fields: [targetItemId], references: [id])
+  targetItemId   String?
+  tierId         Int            // 発生時の階層
+  period         ObligationPeriod
+  issuedFor      DateTime       // 期限の基準日
+  dueDate        DateTime       // 期限
+  status         PurchaseStatus @default(pending)
+  purchaseUrl    String?        // アフィリエイトリンク
+  completedAt    DateTime?
+  verificationUrl String?       // 購入証明画像URL
+  createdAt      DateTime       @default(now())
+
+  @@index([buyerId, period, status])
+}
+
+// 購入履歴
+model PurchaseHistory {
+  id              String    @id @default(uuid())
+  buyerId         String    // 購入者
+  sellerId        String    // 販売者（商品所有者）
+  itemTitle       String
+  itemUrl         String
+  purchasePrice   Int?      // 購入価格
+  affiliateUrl    String    // 使用されたアフィリエイトリンク
+  verified        Boolean   @default(false)
+  verificationUrl String?   // 購入証明
+  purchasedAt     DateTime  @default(now())
+
+  @@index([buyerId, purchasedAt])
+  @@index([sellerId, purchasedAt])
 }

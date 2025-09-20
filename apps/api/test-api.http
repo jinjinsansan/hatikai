@@ -1,0 +1,76 @@
+### Phase 1 & Phase 2 API テスト
+
+### 1. 階層一覧を取得
+GET http://localhost:3001/tiers
+Content-Type: application/json
+
+### 2. 階層を初期化（管理者用）
+POST http://localhost:3001/tiers/initialize
+Content-Type: application/json
+x-admin-token: devadmin
+
+### 3. ユーザーの現在の階層を取得（要認証）
+GET http://localhost:3001/tiers/my-tier
+Content-Type: application/json
+Authorization: Bearer {token}
+
+### 4. 初回ルーレット実行（要認証）
+POST http://localhost:3001/roulette/initial
+Content-Type: application/json
+Authorization: Bearer {token}
+
+### 5. ルーレットプレビュー（確率表示）
+GET http://localhost:3001/roulette/preview
+Content-Type: application/json
+Authorization: Bearer {token}
+
+### 6. 階層分布を取得（管理者用）
+GET http://localhost:3001/tiers/distribution
+Content-Type: application/json
+x-admin-token: devadmin
+
+### 7. ルーレット統計を取得（管理者用）
+GET http://localhost:3001/roulette/statistics
+Content-Type: application/json
+x-admin-token: devadmin
+
+### Phase 2: 義務システム
+
+### 8. ユーザーの現在の義務を取得（要認証）
+GET http://localhost:3001/me/obligations?period=day
+Content-Type: application/json
+Authorization: Bearer {token}
+
+### 9. 義務の進捗を更新（広告視聴）
+POST http://localhost:3001/me/obligations/{obligationId}/progress
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
+  "kind": "view_ad",
+  "meta": {
+    "adSlot": "top-banner"
+  }
+}
+
+### 10. 義務の進捗を更新（購入）
+POST http://localhost:3001/me/obligations/{obligationId}/progress
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
+  "kind": "purchase",
+  "meta": {
+    "itemId": "item-123"
+  }
+}
+
+### 11. 全ユーザーの義務を生成（管理者用・手動実行）
+POST http://localhost:3001/admin/obligations/generate
+Content-Type: application/json
+x-admin-token: devadmin
+
+### 12. 期限切れ義務を処理（管理者用・手動実行）
+POST http://localhost:3001/admin/obligations/expire
+Content-Type: application/json
+x-admin-token: devadmin

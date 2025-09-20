@@ -8,12 +8,16 @@ import { PrismaService } from './prisma/prisma.service'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-  await app.listen(process.env.PORT || 3001)
+  const port = process.env.PORT || 3001
+  await app.listen(port)
+  console.log(`🚀 Server is running on http://localhost:${port}`)
 
   // 簡易スケジューラ: JST 0:00に日次ルーレットを実行（重複防止）
-  const roulette = app.get(RouletteService)
-  const obligations = app.get(ObligationsService)
-  const prisma = app.get(PrismaService)
+  // Skip scheduler if database is not connected
+  try {
+    const roulette = app.get(RouletteService)
+    const obligations = app.get(ObligationsService)
+    const prisma = app.get(PrismaService)
   let lastRunYmd = ''
   setInterval(async () => {
     const now = nowJst()
@@ -41,6 +45,9 @@ async function bootstrap() {
       }
     }
   }, 30 * 1000)
+  } catch (error) {
+    console.log('⚠️ Scheduler not started due to database connection issues')
+  }
 }
 
 bootstrap()

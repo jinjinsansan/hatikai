@@ -9,7 +9,7 @@ type Dist = number[] // length 8
 export class RouletteService {
   private readonly logger = new Logger(RouletteService.name)
 
-  constructor(private prisma: PrismaService) {}
+  constructor(public readonly prisma: PrismaService) {}
 
   async runDailyRouletteForAll(): Promise<{ processed: number }> {
     const users = await this.prisma.user.findMany({ include: { tierState: true } })
@@ -238,5 +238,54 @@ export class RouletteService {
       }
     }
     return streak
+  }
+
+  // 初回ルーレット実行
+  async runInitialRoulette(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user) throw new Error('User not found')
+
+    const existingState = await this.prisma.userTierState.findUnique({
+      where: { userId }
+    })
+
+    if (existingState) {
+      throw new Error('Tier already assigned')
+    }
+
+    return await this.runForUser(user)
+  }
+
+  // ユーザーのルーレット履歴を取得
+  async getUserRouletteHistory(userId: string) {
+    const transitions = await this.prisma.tierTransition.findMany({
+      where: { userId },
+      orderBy: { decidedAt: 'desc' },
+      take: 30
+    })
+
+    return transitions
+  }
+
+  // ルーレット統計情報を取得
+  async getRouletteStatistics() {
+    const last30Days = new Date()
+    last30Days.setDate(last30Days.getDate() - 30)
+
+    const [totalTransitions, distributions] = await Promise.all([
+      this.prisma.tierTransition.count({
+        where: { decidedAt: { gte: last30Days } }
+      }),
+      this.prisma.tierDistributionDaily.findMany({
+        where: { day: { gte: last30Days } },
+        orderBy: { day: 'desc' }
+      })
+    ])
+
+    return {
+      period: '過去30日',
+      totalTransitions,
+      distributions
+    }
   }
 }
